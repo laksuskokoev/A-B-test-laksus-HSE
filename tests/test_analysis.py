@@ -12,7 +12,7 @@ def test_generated_data_valid():
 def test_duplicate_user_id_is_detected():
     df=generate(n_per_arm=100, seed=42)
     df.loc[1, "user_id"] = df.loc[0, "user_id"]
-    with pytest.raises(AssertionError, match="Duplicates"):
+    with pytest.raises(ValueError, match="Duplicates"):
         validate(df)
 
 
@@ -36,3 +36,8 @@ def test_summary_matches_counts():
     assert r["n_control"] > 200
     assert r["n_treatment"] > 200
     assert r["conversions_control"] == df.loc[df.variant.eq("control"),"converted"].sum()
+
+
+def test_missing_columns_raise_clear_error():
+    with pytest.raises(ValueError, match="Missing columns"):
+        validate(__import__("pandas").DataFrame({"user_id": [1]}))
