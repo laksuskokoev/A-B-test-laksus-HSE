@@ -25,23 +25,17 @@ def validate(df):
     """Fail loudly when dataset assumptions are violated."""
     fields = {"user_id", "assigned_at", "variant", "device", "traffic_source",
               "converted", "order_value_rub", "refunded"}
-    if not fields.issubset(df.columns):
-        raise ValueError("Missing columns in input dataset")
-    checks = [
-        (len(df) > 0, "Empty dataset"),
-        (df.user_id.notna().all() and df.user_id.is_unique, "Duplicates/null user_id"),
-        (set(df.variant) == {"control", "treatment"}, "Unexpected variants"),
-        (df[["converted", "refunded"]].isin([0, 1]).all().all(), "Invalid binary flags"),
-        (df[["converted", "refunded", "order_value_rub"]].notna().all().all(), "Null metric values"),
-        ((df.order_value_rub >= 0).all(), "Negative order value"),
-        ((df.loc[df.converted.eq(0), "order_value_rub"] == 0).all(), "Non-buyer with revenue"),
-        ((df.loc[df.converted.eq(1), "order_value_rub"] > 0).all(), "Buyer without revenue"),
-        ((df.refunded <= df.converted).all(), "Refund without purchase"),
-        (pd.to_datetime(df.assigned_at, errors="coerce").notna().all(), "Invalid dates"),
-    ]
-    for valid, message in checks:
-        if not valid:
-            raise ValueError(message)
+    assert fields.issubset(df.columns), "Missing columns in input dataset"
+    assert len(df) > 0, "Empty dataset"
+    assert df.user_id.notna().all() and df.user_id.is_unique, "Duplicates/null user_id"
+    assert set(df.variant) == {"control", "treatment"}, "Unexpected variants"
+    assert df[["converted", "refunded"]].isin([0, 1]).all().all(), "Invalid binary flags"
+    assert df[["converted", "refunded", "order_value_rub"]].notna().all().all()
+    assert (df.order_value_rub >= 0).all(), "Negative order value"
+    assert (df.loc[df.converted.eq(0), "order_value_rub"] == 0).all(), "Non-buyer with revenue"
+    assert (df.loc[df.converted.eq(1), "order_value_rub"] > 0).all(), "Buyer without revenue"
+    assert (df.refunded <= df.converted).all(), "Refund without purchase"
+    assert pd.to_datetime(df.assigned_at, errors="coerce").notna().all(), "Invalid dates"
     return df
 
 
