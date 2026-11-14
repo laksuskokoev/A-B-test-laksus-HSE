@@ -30,7 +30,7 @@
 ## Repository structure
 
 ```text
-checkout-ab-test/
+A-B-test-laksus-HSE/
 ├── README.md
 ├── requirements.txt
 ├── data/
@@ -49,6 +49,8 @@ checkout-ab-test/
 ```
 
 ## Reproduction (Python 3.10+)
+
+CI запускает тесты автоматически при push и открытии pull request (GitHub Actions).
 
 From the repository's top-level folder:
 
