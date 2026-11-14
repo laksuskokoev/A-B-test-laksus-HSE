@@ -2,14 +2,32 @@ name: tests
 on:
   push:
   pull_request:
+
+permissions:
+  contents: write
+
 jobs:
   pytest:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
           cache: pip
       - run: pip install -r requirements.txt
+      - name: Rebuild analysis, report, and charts
+        run: python -m src.analysis
+      - name: Commit generated charts to repository
+        if: github.event_name == 'push'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add figures/conversion.png figures/revenue_per_user.png
+          if ! git diff --cached --quiet; then
+            git commit -m "Add regenerated analysis charts"
+            git push
+          fi
       - run: pytest -q
